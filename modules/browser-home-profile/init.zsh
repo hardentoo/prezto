@@ -3,80 +3,18 @@
 # cache directory in a tmpfs (or zram backed) filesystem
 #
 # $Header: browser-home-profile/init.zsh                 Exp $
-# $Aythor: (c) 2012-2015 -tclover <tokiclover@gmail.com> Exp $
+# $Aythor: (c) 2012-6 -tclover <tokiclover@gmail.com>    Exp $
 # $License: MIT (or 2-clause/new/simplified BSD)         Exp $
-# $Version: 1.0 2015/05/14 21:09:26                      Exp $
+# $Version: 1.1 2016/03/06 21:09:26                      Exp $
 #
 
+functions -u bhp pr-{begin,end,error,warn,info} yesno
 #
-# @FUNCTION: Print error message to stderr
+# Setup a few environment variables for pr-*() helper family
 #
-pr-error()
-{
-	local PFX=${name:+" %F{magenta}${name}:"}
-	print -P${PR_EOL:+n} "${PR_EOL:+\n} %B%F{red}*${PFX}%b%f ${@}" >&2
-}
-
-#
-# @FUNCTION: Print info message to stdout
-#
-pr-info()
-{
-	local PFX=${name:+" %F{yellow}${name}:"}
-	print -P${PR_EOL:+n} "${PR_EOL:+\n} %B%F{blue}*${PFX}%b%f ${@}"
-}
-
-#
-# @FUNCTION: Print warn message to stdout
-#
-pr-warn()
-{
-	local PFX=${name:+" %F{red}${name}:"}
-	print -P${PR_EOL:+n} "${PR_EOL:+\n} %B%F{yellow}*${CLR_RST}${PFX}%f%b ${@}"
-}
-
-#
-# @FUNCTION: Print begin message to stdout
-#
-pr-begin()
-{
-	case ${PR_EOL} {
-		(0) echo;;
-	}
-:	${PR_EOL=0}
-	local PFX=${name:+"%B%F{magenta}[%f %F{blue}${name}%f: %F{magenta}]%f%b"}
-	print -P " ${PFX} ${@}"
-}
-
-#
-# @FUNCTION: Print end message to stdout
-#
-pr-end()
-{
-	local SFX
-	case ${1:-0} {
-		(0) SFX="%F{blue}[%f %F{green}Ok%f %F{blue}]%f";;
-		(*) SFX="%F{yellow}[%f %F{red}No%f %F{yellow}]%f";;
-	}
-	shift
-	print -P " ${@} %B${SFX}%b"
-	PR_EOL=
-}
-
-#
-# @FUNCTION: YES or NO helper
-#
-yesno()
-{
-	case ${1:-NO} {
-	(0|[Dd][Ii][Ss][Aa][Bb][Ll][Ee]|[Oo][Ff][Ff]|[Ff][Aa][Ll][Ss][Ee]|[Nn][Oo])
-		return 1;;
-	(1|[Ee][Nn][Aa][Bb][Ll][Ee]|[Oo][Nn]|[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss])
-		return 0;;
-	(*)
-		return 2;;
-	}
-}
+PR_COL="$(tput cols)"
+# the following should be set before calling pr-end()
+#PR_LEN=${PR_LEN}
 
 #
 # Set up (terminal) colors
@@ -196,7 +134,6 @@ function {
 	#
 	# Finaly, decompress the browser-home-profile
 	#
-	#(( ${+functions[fhp]} )) || autoload -Uz fhp
 	if zstyle -t ':prezto:module:BHP' decompress; then
 		bhp
 	fi
