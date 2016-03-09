@@ -87,11 +87,11 @@ function bhp {
 		if [[ -f ${profile}/.unpacked ]]; then
 			if [[ -f ${profile}${ext} ]] {
 				mv -f ${profile}${ext} ${profile}.old${ext} ||
-					{ pr-end 1 Moving; continue; }
+					{ pr-end 2 "Moving"; continue; }
 			}
-			tar -X ${profile}/.unpacked -Ocp ${profile} | \
-				${=compressor} ${profile}${ext} &>/dev/null ||
-				{ pr-end 1 Packing; continue; }
+			tar -X ${profile}/.unpacked -cpf ${profile}${ext} \
+				-I ${compressor} ${profile} ||
+				{ pr-end 3 "Packing"; continue; }
 		else
 			if [[ -f ${profile}${ext} ]]; then
 				tarball=${profile}${ext}
@@ -100,9 +100,8 @@ function bhp {
 			else
 				pr-warn "No tarball found."; continue
 			fi
-			${compressor[(w)1]} -cd ${tarball} | tar -xp &&
-				touch ${profile}/.unpacked ||
-				{ pr-end 1 Unpacking; continue; }
+			 tar -xpf ${tarball} -I ${compressor} &&
+				 touch ${profile}/.unpacked || { pr-end 5 "Unpacking"; continue; }
 		fi
 		popd -q
 		pr-end ${?}

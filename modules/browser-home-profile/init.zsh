@@ -5,7 +5,7 @@
 # $Header: browser-home-profile/init.zsh                 Exp $
 # $Aythor: (c) 2012-6 -tclover <tokiclover@gmail.com>    Exp $
 # $License: MIT (or 2-clause/new/simplified BSD)         Exp $
-# $Version: 1.1 2016/03/06 21:09:26                      Exp $
+# $Version: 1.2 2016/03/08 21:09:26                      Exp $
 #
 
 functions -u bhp pr-{begin,end,error,warn,info} yesno
@@ -42,25 +42,24 @@ function {
 	# Set up web-browser if any
 	#
 	function {
-		local BROWSERS MOZ_BROWSERS set brs dir
-		MOZ_BROWSERS='aurora firefox icecat seamonkey'
-		BROWSERS='conkeror chrom epiphany midory opera otter qupzilla vivaldi'
+		local group browser
+		local -A BROWSERS
+		BROWSERS[mozilla]='aurora firefox icecat seamonkey'
+		BROWSERS[config]='conkeror chrome chromium epiphany midory opera otter qupzilla vivaldi'
 
 		case ${1} {
-			(*aurora|firefox*|icecat|seamonkey)
+			(aurora|firefox|icecat|seamonkey)
 				BROWSER=${1} PROFILE=mozilla/${1}; return;;
-			(conkeror*|*chrom*|epiphany|midory|opera*|otter*|qupzilla|vivaldi*)
+			(conkeror|chrome|chromium|epiphany|midory|opera|otter|qupzilla|vivaldi)
 				BROWSER=${1} PROFILE=config/${1} ; return;;
 		}
 
-		for set ("mozilla:${MOZ_BROWSERS}" "config:${BROWSERS}")
-			for brs (${=set#*:}) {
-				set=${set%:*}
-				for dir (${HOME}/.${set}/*${brs}*(N/))
-					if [[ -d ${dir} ]] {
-						BROWSER=${brs} PROFILE=${set}/${brs}
-						return
-					}
+		for key (${(k)BROWSERS[@]})
+			for browser (${=BROWSERS[${key}]}) {
+				if [[ -d ${HOME}/.${key}/${browser} ]] {
+					BROWSER=${browser} PROFILE=${key}/${browser}
+					return
+				}
 			}
 		return 111
 	} "${browser:-$BROWSER}"
@@ -92,7 +91,7 @@ function {
 		;;
 	}
 
-:	${compressor:=lz4 -1 -}
+:	${compressor:=lz4 -1}
 :	${profile:=${PROFILE:t}}
 :	${tmpdir:=${TMPDIR:-/tmp/$USER}}
 	local ext=.tar.${compressor[(w)1]}
@@ -116,8 +115,8 @@ function {
 
 		pushd -q ${dir:h} || continue
 		if [[ ! -f ${profile}${ext} ]] || [[ ! -f ${profile}.old${ext} ]] {
-			tar -Ocp ${profile} | ${=compressor} ${profile}${ext} ||
-				{ pr-error "Failed to pack a tarball"; continue; }
+			tar -cpf ${profile}${ext} -I ${compressor} ${profile} ||
+				{ pr-end 1 "Tarball"; continue; }
 		}
 		popd -q
 
@@ -138,7 +137,6 @@ function {
 		bhp
 	fi
 }
-
 #
 # vim:fenc=utf-8:ft=zsh:ci:pi:sts=2:sw=2:ts=2:
 #
