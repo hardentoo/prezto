@@ -10,7 +10,7 @@
 #
 function pr-error {
 	local PFX=${name:+%F{magenta}${name}:}
-	print -P${PR_EOL:+n} "${PR_EOL}%B%F{red}* ${PFX}%b%f ${@}" >&2
+	print -P${print_info[eol]:+n} "${print_info[eol]}%B%F{red}* ${PFX}%b%f ${@}" >&2
 }
 
 #
@@ -18,7 +18,7 @@ function pr-error {
 #
 function pr-info {
 	local PFX=${name:+%F{yellow}${name}:}
-	print -P${PR_EOL:+n} "${PR_EOL}%B%F{blue}* ${PFX}%b%f ${@}"
+	print -P${print_info[eol]:+n} "${print_info[eol]}%B%F{blue}* ${PFX}%b%f ${@}"
 }
 
 #
@@ -26,16 +26,16 @@ function pr-info {
 #
 function pr-warn {
 	local PFX=${name:+%F{red}${name}:}
-	print -P${PR_EOL:+n} "${PR_EOL}%B%F{yellow}* ${CLR_RST}${PFX}%f%b ${@}"
+	print -P${print_info[eol]:+n} "${print_info[eol]}%B%F{yellow}* ${CLR_RST}${PFX}%f%b ${@}"
 }
 
 #
 # @FUNCTION: Print begin message to stdout
 #
 function pr-begin {
-	print -Pn "${PR_EOL}"
-	PR_EOL="\n"
-	PR_LEN=$((${#name}+${#*}))
+	print -Pn "${print_info[eol]}"
+	print_info[eol]="\n"
+	print_info[len]=$((${#name}+${#*}))
 	local PFX=${name:+%B%F{magenta}[%f%F{blue}${name}%f%F{magenta}]%f%b}
 	print -Pn "${PFX} ${@}"
 }
@@ -50,10 +50,10 @@ function pr-end {
 		(*) SFX="%F{yellow}[%f%F{red}No%f%F{yellow}]%f";;
 	}
 	shift
-	PR_LEN=$((${PR_COL}-${PR_LEN}))
-	printf "%*b" ${PR_LEN} $(print -P "${@} %B${SFX}%b")
+	print_info[len]=$((${print_info[cols]}-${print_info[len]}))
+	printf "%*b" ${print_info[len]} $(print -P "${@} %B${SFX}%b")
 	print
-	PR_EOL= PR_LEN=0
+	print_info[eol]= print_info[len]=0
 }
 
 #

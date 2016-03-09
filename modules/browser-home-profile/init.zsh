@@ -12,14 +12,17 @@ functions -u bhp pr-{begin,end,error,warn,info} yesno
 #
 # Setup a few environment variables for pr-*() helper family
 #
-PR_COL="$(tput cols)"
+typeset -A print_info
+print_info[cols]=$(tput cols)
 # the following should be set before calling pr-end()
-#PR_LEN=${PR_LEN}
+#print_info[len]=${print_info[len]}
+# and this keep updating print_info[cols]
+trap 'print_info[cols]=$(tput cols)' WINCH
 
 #
 # Set up (terminal) colors
 #
-if [ -t 1 ] && yesno ${COLOR:-Yes}; then
+if [ -t 1 ] && yesno ${PRINT_COLOR:-Yes}; then
 	autoload colors zsh/terminfo
 	if (( ${terminfo[colors]} >= 8 )) { colors }
 fi
