@@ -13,11 +13,11 @@ functions -u bhp pr-{begin,end,error,warn,info} yesno
 # Setup a few environment variables for pr-*() helper family
 #
 typeset -A print_info
-print_info[cols]=$(tput cols)
+print_info[cols]=${COLUMNS:=$(tput cols)}
 # the following should be set before calling pr-end()
 #print_info[len]=${print_info[len]}
 # and this keep updating print_info[cols]
-trap 'print_info[cols]=$(tput cols)' WINCH
+trap 'print_info[cols]=${COLUMNS:=$(tput cols)}' WINCH
 
 #
 # Set up (terminal) colors
